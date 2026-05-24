@@ -2,90 +2,59 @@ import sharp from "sharp";
 import path from "path";
 import fs from "fs";
 
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 800;
-const PADDING = 28;
+const W = 800;
+const H = 800;
 
-function escapeXml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+function escapeXml(t: string) {
+  return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
-function wrapText(text: string, maxCharsPerLine = 20): string[] {
+function wrapText(text: string, max = 18): string[] {
   const words = text.split(" ");
   const lines: string[] = [];
-  let current = "";
-  for (const word of words) {
-    if ((current + " " + word).trim().length > maxCharsPerLine) {
-      if (current) lines.push(current.trim());
-      current = word;
+  let cur = "";
+  for (const w of words) {
+    if ((cur + " " + w).trim().length > max) {
+      if (cur) lines.push(cur.trim());
+      cur = w;
     } else {
-      current = (current + " " + word).trim();
+      cur = (cur + " " + w).trim();
     }
   }
-  if (current) lines.push(current.trim());
+  if (cur) lines.push(cur.trim());
   return lines;
 }
 
-function buildTextSvg(
-  topLines: string[],
-  bottomLines: string[],
-  w: number,
-  h: number
-): Buffer {
-  const fontSize = 54;
-  const lineH = fontSize * 1.25;
-  const stroke = 7;
+async function makeTextImage(text: string, width: number, fontSize: number): Promise<Buffer> {
+  const lines = wrapText(text, 18);
+  const lineH = Math.round(fontSize * 1.3);
+  const totalH = lines.length * lineH + 20;
+  const stroke = Math.round(fontSize * 0.12);
 
-  const topBlocks = topLines
-    .map((line, i) => {
-      const y = PADDING + fontSize + i * lineH;
-      return `<text
-        x="${w / 2}" y="${y}"
-        font-family="Arial Black, Impact, sans-serif"
-        font-size="${fontSize}"
-        font-weight="900"
-        text-anchor="middle"
-        dominant-baseline="auto"
-        fill="white"
-        stroke="black"
-        stroke-width="${stroke}"
-        stroke-linejoin="round"
-        paint-order="stroke fill"
-        letter-spacing="1"
-      >${escapeXml(line)}</text>`;
-    })
+  const textElements = lines
+    .map(
+      (line, i) =>
+        `<text
+          x="${width / 2}"
+          y="${fontSize + i * lineH}"
+          font-size="${fontSize}"
+          font-weight="bold"
+          font-family="Arial Black, Arial, sans-serif"
+          text-anchor="middle"
+          fill="white"
+          stroke="black"
+          stroke-width="${stroke}"
+          stroke-linejoin="round"
+          paint-order="stroke fill"
+        >${escapeXml(line)}</text>`
+    )
     .join("\n");
 
-  const bottomBlocks = bottomLines
-    .map((line, i) => {
-      const y = h - PADDING - (bottomLines.length - 1 - i) * lineH;
-      return `<text
-        x="${w / 2}" y="${y}"
-        font-family="Arial Black, Impact, sans-serif"
-        font-size="${fontSize}"
-        font-weight="900"
-        text-anchor="middle"
-        dominant-baseline="auto"
-        fill="white"
-        stroke="black"
-        stroke-width="${stroke}"
-        stroke-linejoin="round"
-        paint-order="stroke fill"
-        letter-spacing="1"
-      >${escapeXml(line)}</text>`;
-    })
-    .join("\n");
-
-  const svg = `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
-    ${topBlocks}
-    ${bottomBlocks}
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${totalH}">
+    ${textElements}
   </svg>`;
 
-  return Buffer.from(svg);
+  return sharp(Buffer.from(svg)).png().toBuffer();
 }
 
 export async function compositeMeme(
@@ -94,68 +63,56 @@ export async function compositeMeme(
   uploadedImageBase64?: string,
   uploadedImageMimeType?: string
 ): Promise<Buffer> {
-  const enimPath = path.join(process.cwd(), "public", "hotenim.jpg");
-  let baseBuffer: Buffer;
+  const eminPath = path.join(process.cwd(), "public", "hotemin.jpg");
 
-  if (fs.existsSync(enimPath)) {
-    baseBuffer = fs.readFileSync(enimPath);
-  } else {
-    baseBuffer = await sharp({
-      create: {
-        width: CANVAS_WIDTH,
-        height: CANVAS_HEIGHT,
-        channels: 3,
-        background: { r: 15, g: 8, b: 35 },
-      },
-    })
+  let base: Buffer;
+  if (fs.existsSync(eminPath)) {
+    base = await sharp(fs.readFileSync(eminPath))
+      .resize(W, H, { fit: "cover", position: "center" })
       .jpeg()
       .toBuffer();
+  } else {
+    // RED fallback — means hotemin.jpg is missing from /public
+    base = await sharp({
+      create: { width: W, height: H, channels: 3, background: { r: 180, g: 30, b: 30 } },
+    }).jpeg().toBuffer();
   }
-
-  const base = await sharp(baseBuffer)
-    .resize(CANVAS_WIDTH, CANVAS_HEIGHT, { fit: "cover", position: "center" })
-    .toBuffer();
 
   const compositeSteps: sharp.OverlayOptions[] = [];
 
   if (uploadedImageBase64 && uploadedImageMimeType) {
-    const uploadedBuffer = Buffer.from(uploadedImageBase64, "base64");
-    const overlaySize = 180;
-    const overlayPad = 16;
-
-    const circleMask = Buffer.from(
-      `<svg width="${overlaySize}" height="${overlaySize}">
-        <circle cx="${overlaySize / 2}" cy="${overlaySize / 2}" r="${overlaySize / 2}" fill="white"/>
-      </svg>`
-    );
-
-    const overlayImg = await sharp(uploadedBuffer)
-      .resize(overlaySize, overlaySize, { fit: "cover", position: "center" })
-      .composite([{ input: circleMask, blend: "dest-in" }])
-      .png()
-      .toBuffer();
-
-    compositeSteps.push({
-      input: overlayImg,
-      top: overlayPad,
-      left: CANVAS_WIDTH - overlaySize - overlayPad,
-      blend: "over",
-    });
+    try {
+      const size = 160;
+      const pad = 16;
+      const mask = Buffer.from(
+        `<svg width="${size}" height="${size}"><circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="white"/></svg>`
+      );
+      const circle = await sharp(Buffer.from(uploadedImageBase64, "base64"))
+        .resize(size, size, { fit: "cover", position: "center" })
+        .composite([{ input: mask, blend: "dest-in" }])
+        .png()
+        .toBuffer();
+      compositeSteps.push({ input: circle, top: pad, left: W - size - pad, blend: "over" });
+    } catch (e) {
+      console.warn("[compositor] user image overlay failed:", e);
+    }
   }
 
-  const topLines = wrapText(topText, 20);
-  const bottomLines = wrapText(bottomText, 20);
-  const textSvg = buildTextSvg(topLines, bottomLines, CANVAS_WIDTH, CANVAS_HEIGHT);
+  try {
+    const topImg = await makeTextImage(topText, W, 56);
+    compositeSteps.push({ input: topImg, top: 20, left: 0, blend: "over" });
+  } catch (e) {
+    console.warn("[compositor] top text failed:", e);
+  }
 
-  compositeSteps.push({
-    input: textSvg,
-    top: 0,
-    left: 0,
-    blend: "over",
-  });
+  try {
+    const bottomImg = await makeTextImage(bottomText, W, 56);
+    const meta = await sharp(bottomImg).metadata();
+    const bottomH = meta.height ?? 80;
+    compositeSteps.push({ input: bottomImg, top: H - bottomH - 20, left: 0, blend: "over" });
+  } catch (e) {
+    console.warn("[compositor] bottom text failed:", e);
+  }
 
-  return sharp(base)
-    .composite(compositeSteps)
-    .jpeg({ quality: 92 })
-    .toBuffer();
+  return sharp(base).composite(compositeSteps).jpeg({ quality: 92 }).toBuffer();
 }

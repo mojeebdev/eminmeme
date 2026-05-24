@@ -36,7 +36,7 @@ export default function Header() {
         >
           <Image
             src="/favicon-32x32.png"
-            alt="Enim"
+            alt="Emin"
             width={28}
             height={28}
             style={{ borderRadius: "4px" }}
@@ -50,7 +50,7 @@ export default function Header() {
               letterSpacing: "-0.01em",
             }}
           >
-            Enim{" "}
+            Emin{" "}
             <span style={{ color: "var(--gold)", fontStyle: "italic" }}>
               Meme
             </span>
@@ -66,7 +66,7 @@ export default function Header() {
             className="btn-ghost"
             style={{ fontSize: "11px", padding: "6px 12px" }}
           >
-            Follow $HOTENIM
+            Follow $HOTEMIN
           </a>
           <a
             href="#generate"

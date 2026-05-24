@@ -32,7 +32,7 @@ export async function GET(
             fontFamily: "serif",
           }}
         >
-          Enim Meme Generator
+          Emin Meme Generator
         </div>
       ),
       { width: 1200, height: 630 }
@@ -73,7 +73,7 @@ export async function GET(
                 textTransform: "uppercase",
               }}
             >
-              Enim Meme Generator
+              Emin Meme Generator
             </div>
             <div
               style={{
@@ -90,10 +90,10 @@ export async function GET(
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             <div style={{ fontSize: "13px", color: "#6B5E8A" }}>
-              enim is hot bozo · enim is him
+              emin is hot bozo · emin is him
             </div>
             <div style={{ fontSize: "13px", color: "#C4A55A" }}>
-              enimmeme.vercel.app
+              eminmeme.vercel.app
             </div>
           </div>
         </div>

@@ -26,7 +26,7 @@ export default function ShareButtons({ memeUrl, shareText, memeOutputUrl }: Prop
     const blob = await res.blob();
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "enim-meme.jpg";
+    a.download = "emin-meme.jpg";
     a.click();
   };
 

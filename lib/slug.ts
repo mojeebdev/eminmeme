@@ -14,5 +14,5 @@ export function generateSlug(): string {
   const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
   const noun = nouns[Math.floor(Math.random() * nouns.length)];
   const uid = uuidv4().split("-")[0];
-  return `enim-${adj}-${noun}-${uid}`;
+  return `emin-${adj}-${noun}-${uid}`;
 }

@@ -31,7 +31,7 @@ export default function Home() {
       <section style={{ padding: "80px 0 64px", textAlign: "center", position: "relative" }}>
         <div className="container">
           <p className="label" style={{ marginBottom: "20px", color: "var(--gold-dim)" }}>
-            enim is hot bozo · enim is him · $HOTENIM
+            emin is hot bozo · emin is him · $HOTEMIN
           </p>
           <h1
             style={{
@@ -44,7 +44,7 @@ export default function Home() {
               letterSpacing: "-0.02em",
             }}
           >
-            Enim Meme
+            Emin Meme
             <br />
             <span style={{ color: "var(--gold)", fontStyle: "italic" }}>Generator</span>
           </h1>
@@ -58,7 +58,7 @@ export default function Home() {
               lineHeight: 1.6,
             }}
           >
-            Upload your photo, describe the vibe — Enim takes over.
+            Upload your photo, describe the vibe — Emin takes over.
             <br />
             No sign up. Pure chaos.
           </p>
@@ -137,7 +137,7 @@ export default function Home() {
                   </Link>
                   <a
                     href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                      `I just meme'd Enim on Enim Meme Generator 🔥 ${result.meme_caption}\n\nenimmeme.vercel.app/meme/${result.slug}`
+                      `I just meme'd Emin on Emin Meme Generator 🔥 ${result.meme_caption}\n\neminmeme.vercel.app/meme/${result.slug}`
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"

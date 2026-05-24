@@ -1,8 +1,8 @@
-# Enim Meme Generator
+# Emin Meme Generator
 
-> enim is hot bozo. enim is him.
+> emin is hot bozo. emin is him.
 
-AI-powered meme generator featuring Enim as the eternal main character. Built with Next.js 14, Gemini 2.0 Flash, Supabase, and Umami Analytics.
+AI-powered meme generator featuring Emin as the eternal main character. Built with Next.js 14, Gemini 2.0 Flash, Supabase, and Umami Analytics.
 
 ---
 
@@ -24,7 +24,7 @@ AI-powered meme generator featuring Enim as the eternal main character. Built wi
 
 ```bash
 git clone <repo>
-cd enim-meme-generator
+cd emin-meme-generator
 npm install
 ```
 
@@ -37,7 +37,7 @@ GEMINI_API_KEY=          # https://aistudio.google.com/app/apikey (free)
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_SITE_URL=    # https://enimmeme.vercel.app
+NEXT_PUBLIC_SITE_URL=    # https://eminmeme.vercel.app
 NEXT_PUBLIC_UMAMI_WEBSITE_ID=
 ```
 
@@ -47,9 +47,9 @@ Run the SQL in `supabase-schema.sql` in your Supabase SQL Editor.
 
 Make sure your `memes` storage bucket exists and is set to **public**.
 
-### 4. Add Enim's image
+### 4. Add Emin's image
 
-Place `hotenim.jpg` in the `/public` folder. This is the hardcoded character that appears in every meme.
+Place `hotemin.jpg` in the `/public` folder. This is the hardcoded character that appears in every meme.
 
 Place `avalanche-avax-logo.png` in the `/public` folder (footer credit).
 
@@ -87,7 +87,7 @@ Note: `sharp` requires the `@vercel/node` runtime for image compositing — this
 1. User uploads a photo + writes a vibe prompt + optional X handle
 2. `POST /api/generate` sends image + prompt to **Gemini 2.0 Flash**
 3. Gemini returns `top_text`, `bottom_text`, and a `caption`
-4. **sharp** composites the text over `/public/hotenim.jpg` (user image shown as corner overlay if provided)
+4. **sharp** composites the text over `/public/hotemin.jpg` (user image shown as corner overlay if provided)
 5. Composited JPEG → uploaded to Supabase Storage
 6. Row saved to `memes` table with slug
 7. `/meme/[slug]` page is the shareable link
@@ -99,4 +99,4 @@ Note: `sharp` requires the `@vercel/node` runtime for image compositing — this
 
 - Built by [@mojeebeth](https://x.com/mojeebeth) of [BlindspotLab](https://blindspotlab.xyz)
 - Powered by [Avalanche](https://avax.network)
-- Follow [$HOTENIM](https://x.com/HotEminSummer) — @HotEminSummer
+- Follow [$HOTEMIN](https://x.com/HotEminSummer) — @HotEminSummer

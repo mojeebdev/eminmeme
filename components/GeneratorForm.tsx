@@ -106,7 +106,7 @@ export default function GeneratorForm({ loading, onLoading, onGenerated }: Props
         Generate Your Meme
       </h2>
       <p style={{ fontSize: "14px", color: "var(--muted)", marginBottom: "32px" }}>
-        Enim always shows up. Add your photo for a bonus cameo.
+        Emin always shows up. Add your photo for a bonus cameo.
       </p>
 
       {/* Image upload zone */}
@@ -208,7 +208,7 @@ export default function GeneratorForm({ loading, onLoading, onGenerated }: Props
         </label>
         <textarea
           className="input-field"
-          placeholder="e.g. me showing up to work on Monday pretending I'm fine... Enim energy only"
+          placeholder="e.g. me showing up to work on Monday pretending I'm fine... Emin energy only"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           maxLength={500}
@@ -267,7 +267,7 @@ export default function GeneratorForm({ loading, onLoading, onGenerated }: Props
                 animation: "spin 0.7s linear infinite",
               }}
             />
-            Enim is cooking...
+            Emin is cooking...
           </>
         ) : (
           "Generate Meme →"

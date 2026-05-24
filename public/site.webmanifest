@@ -1,7 +1,7 @@
 {
-  "name": "Enim Meme Generator",
-  "short_name": "EnimMeme",
-  "description": "enim is hot bozo. enim is him. generate memes now.",
+  "name": "Emin Meme Generator",
+  "short_name": "EminMeme",
+  "description": "emin is hot bozo. emin is him. generate memes now.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0D0A1A",

@@ -31,7 +31,7 @@ export default function Footer() {
                 marginBottom: "6px",
               }}
             >
-              enim is hot bozo · enim is him
+              emin is hot bozo · emin is him
             </p>
             <p style={{ fontSize: "12px", color: "var(--muted)" }}>
               Built by{" "}
@@ -97,7 +97,7 @@ export default function Footer() {
           }}
         >
           <p style={{ fontSize: "11px", color: "var(--muted)" }}>
-            © {new Date().getFullYear()} Enim Meme Generator. All memes belong to
+            © {new Date().getFullYear()} Emin Meme Generator. All memes belong to
             the culture.
           </p>
           <a

@@ -15,32 +15,32 @@ const lato = Lato({
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://enimmeme.vercel.app";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://eminmeme.vercel.app";
 
 export const metadata: Metadata = {
-  title: "Enim Meme Generator — enim is hot bozo, enim is him",
+  title: "Emin Meme Generator — emin is hot bozo, emin is him",
   description:
-    "Generate savage, viral memes with Enim — the hottest bozo on the internet. Powered by AI. No sign up. Share to X instantly.",
+    "Generate savage, viral memes with Emin — the hottest bozo on the internet. Powered by AI. No sign up. Share to X instantly.",
   metadataBase: new URL(SITE_URL),
   openGraph: {
-    title: "Enim Meme Generator",
-    description: "enim is hot bozo. enim is him. generate your meme now 🔥",
+    title: "Emin Meme Generator",
+    description: "emin is hot bozo. emin is him. generate your meme now 🔥",
     url: SITE_URL,
-    siteName: "Enim Meme Generator",
+    siteName: "Emin Meme Generator",
     images: [
       {
         url: "/og-default.jpg",
         width: 1200,
         height: 630,
-        alt: "Enim Meme Generator",
+        alt: "Emin Meme Generator",
       },
     ],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Enim Meme Generator",
-    description: "enim is hot bozo. enim is him. generate your meme now 🔥",
+    title: "Emin Meme Generator",
+    description: "emin is hot bozo. emin is him. generate your meme now 🔥",
     images: ["/og-default.jpg"],
     site: "@HotEminSummer",
   },
