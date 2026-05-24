@@ -7,7 +7,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
-  console.log("SERVICE KEY:", process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 10));
+  
   try {
     const body = await req.json();
     const { prompt, xHandle, imageBase64, imageMimeType } = body;

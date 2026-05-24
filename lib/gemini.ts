@@ -25,7 +25,7 @@ export async function generateMemeCaptions(
   imageBase64?: string,
   imageMimeType?: string
 ): Promise<{ top_text: string; bottom_text: string; caption: string }> {
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite-preview-06-17" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
   const parts: Part[] = [];
 
