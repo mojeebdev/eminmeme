@@ -77,16 +77,16 @@ export async function compositeMeme(
   uploadedImageBase64?: string,
   uploadedImageMimeType?: string
 ): Promise<Buffer> {
-  const enimPath = path.join(process.cwd(), "public", "hotenim.jpg");
+  const eminPath = path.join(process.cwd(), "public", "hotemin.jpg");
 
   let base: Buffer;
-  if (fs.existsSync(enimPath)) {
-    base = await sharp(fs.readFileSync(enimPath))
+  if (fs.existsSync(eminPath)) {
+    base = await sharp(fs.readFileSync(eminPath))
       .resize(W, H, { fit: "cover", position: "center" })
       .jpeg()
       .toBuffer();
   } else {
-    console.warn("[compositor] hotenim.jpg missing");
+    console.warn("[compositor] hotemin.jpg missing");
     base = await sharp({
       create: { width: W, height: H, channels: 3, background: { r: 180, g: 30, b: 30 } },
     })
