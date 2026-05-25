@@ -1,8 +1,8 @@
 import sharp from "sharp";
 import path from "path";
 import fs from "fs";
-// @ts-ignore
 import satori from "satori";
+import React from "react";
 
 const W = 800;
 const H = 800;
@@ -23,47 +23,50 @@ function wrapText(text: string, max = 16): string[] {
   return lines.slice(0, 3);
 }
 
-async function makeTextSvg(text: string, position: "top" | "bottom"): Promise<Buffer> {
+async function makeTextSvg(text: string): Promise<Buffer> {
   const fontPath = path.join(process.cwd(), "public", "impact.ttf");
   const fontData = fs.readFileSync(fontPath);
   const lines = wrapText(text);
 
-  const svg = await satori(
+  const element = React.createElement(
+    "div",
     {
-      type: "div",
-      props: {
-        style: {
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          width: W,
-          padding: "16px 20px",
-          gap: 4,
-        },
-        children: lines.map((line) => ({
-          type: "div",
-          props: {
-            style: {
-              fontFamily: "Impact",
-              fontSize: 60,
-              fontWeight: 900,
-              color: "white",
-              textShadow: "-4px -4px 0 black, 4px -4px 0 black, -4px 4px 0 black, 4px 4px 0 black",
-              textTransform: "uppercase",
-              letterSpacing: 2,
-              textAlign: "center",
-            },
-            children: line,
-          },
-        })),
+      style: {
+        display: "flex",
+        flexDirection: "column" as const,
+        alignItems: "center",
+        width: W,
+        padding: "16px 20px",
+        gap: 4,
       },
     },
-    {
-      width: W,
-      height: H,
-      fonts: [{ name: "Impact", data: fontData, weight: 900, style: "normal" }],
-    }
+    ...lines.map((line, i) =>
+      React.createElement(
+        "div",
+        {
+          key: i,
+          style: {
+            fontFamily: "Impact",
+            fontSize: 60,
+            fontWeight: 900,
+            color: "white",
+            textShadow:
+              "-4px -4px 0 black, 4px -4px 0 black, -4px 4px 0 black, 4px 4px 0 black, -4px 0 0 black, 4px 0 0 black, 0 -4px 0 black, 0 4px 0 black",
+            textTransform: "uppercase" as const,
+            letterSpacing: 2,
+            textAlign: "center" as const,
+          },
+        },
+        line
+      )
+    )
   );
+
+  const svg = await satori(element, {
+    width: W,
+    height: H,
+    fonts: [{ name: "Impact", data: fontData, weight: 900, style: "normal" as const }],
+  });
 
   return Buffer.from(svg);
 }
@@ -86,7 +89,9 @@ export async function compositeMeme(
     console.warn("[compositor] hotenim.jpg missing");
     base = await sharp({
       create: { width: W, height: H, channels: 3, background: { r: 180, g: 30, b: 30 } },
-    }).jpeg().toBuffer();
+    })
+      .jpeg()
+      .toBuffer();
   }
 
   const steps: sharp.OverlayOptions[] = [];
@@ -97,7 +102,7 @@ export async function compositeMeme(
       const size = 160;
       const pad = 16;
       const mask = Buffer.from(
-        `<svg width="${size}" height="${size}"><circle cx="${size/2}" cy="${size/2}" r="${size/2}" fill="white"/></svg>`
+        `<svg width="${size}" height="${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="white"/></svg>`
       );
       const circle = await sharp(Buffer.from(uploadedImageBase64, "base64"))
         .resize(size, size, { fit: "cover", position: "center" })
@@ -110,19 +115,19 @@ export async function compositeMeme(
     }
   }
 
-  // Top text via satori
+  // Top text
   try {
-    const topSvg = await makeTextSvg(topText, "top");
-    const topPng = await sharp(topSvg).png().toBuffer();
+    const topSvg = await makeTextSvg(topText);
+    const topPng = await sharp(Buffer.from(topSvg)).png().toBuffer();
     steps.push({ input: topPng, top: 16, left: 0, blend: "over" });
   } catch (e) {
     console.warn("[compositor] top text failed:", e);
   }
 
-  // Bottom text via satori
+  // Bottom text
   try {
-    const botSvg = await makeTextSvg(bottomText, "bottom");
-    const botPng = await sharp(botSvg).png().toBuffer();
+    const botSvg = await makeTextSvg(bottomText);
+    const botPng = await sharp(Buffer.from(botSvg)).png().toBuffer();
     const bh = (await sharp(botPng).metadata()).height ?? 90;
     steps.push({ input: botPng, top: H - bh - 16, left: 0, blend: "over" });
   } catch (e) {
