@@ -7,6 +7,54 @@ import React from "react";
 const W = 800;
 const H = 800;
 
+let cachedFont: ArrayBuffer | null = null;
+
+async function getFont(): Promise<ArrayBuffer> {
+  if (cachedFont) return cachedFont;
+
+  // Try valid local TTF first
+  const localPath = path.join(process.cwd(), "public", "meme-font.ttf");
+  if (fs.existsSync(localPath)) {
+    const buf = fs.readFileSync(localPath);
+    const magic = buf.readUInt32BE(0);
+    const isValidTTF =
+      magic === 0x00010000 || // TTF
+      magic === 0x74727565 || // 'true'
+      magic === 0x4f54544f;   // 'OTTO' (OTF)
+    if (isValidTTF) {
+      console.log("[compositor] using local meme-font.ttf");
+      cachedFont = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+      return cachedFont;
+    }
+  }
+
+  // Fetch Anton (Impact-style) TTF from Google Fonts API
+  console.log("[compositor] fetching font from Google Fonts...");
+  const cssRes = await fetch(
+    "https://fonts.googleapis.com/css2?family=Anton&display=swap",
+    { headers: { "User-Agent": "Mozilla/5.0" } }
+  );
+  const css = await cssRes.text();
+  const ttfMatch = css.match(/src: url\(([^)]+\.(?:ttf|woff2))\)/);
+
+  if (ttfMatch) {
+    const fontRes = await fetch(ttfMatch[1]);
+    if (fontRes.ok) {
+      cachedFont = await fontRes.arrayBuffer();
+      console.log("[compositor] font fetched, size:", cachedFont.byteLength);
+      return cachedFont;
+    }
+  }
+
+  // Final fallback: fetch Roboto Bold TTF directly from gstatic
+  const fallback = await fetch(
+    "https://fonts.gstatic.com/s/roboto/v32/KFOlCnqEu92Fr1MmWUlvAx05IsDqlA.ttf"
+  );
+  if (!fallback.ok) throw new Error("All font fetches failed");
+  cachedFont = await fallback.arrayBuffer();
+  return cachedFont;
+}
+
 function wrapText(text: string, max = 16): string[] {
   const words = text.split(" ");
   const lines: string[] = [];
@@ -23,9 +71,8 @@ function wrapText(text: string, max = 16): string[] {
   return lines.slice(0, 3);
 }
 
-async function makeTextSvg(text: string): Promise<Buffer> {
-  const fontPath = path.join(process.cwd(), "public", "impact.ttf");
-  const fontData = fs.readFileSync(fontPath);
+async function makeTextPng(text: string): Promise<Buffer> {
+  const fontData = await getFont();
   const lines = wrapText(text);
 
   const element = React.createElement(
@@ -36,8 +83,8 @@ async function makeTextSvg(text: string): Promise<Buffer> {
         flexDirection: "column" as const,
         alignItems: "center",
         width: W,
-        padding: "16px 20px",
-        gap: 4,
+        padding: "12px 20px",
+        gap: 6,
       },
     },
     ...lines.map((line, i) =>
@@ -46,15 +93,16 @@ async function makeTextSvg(text: string): Promise<Buffer> {
         {
           key: i,
           style: {
-            fontFamily: "Impact",
-            fontSize: 60,
-            fontWeight: 900,
+            fontFamily: "MemeFont",
+            fontSize: 58,
+            fontWeight: 400,
             color: "white",
             textShadow:
-              "-4px -4px 0 black, 4px -4px 0 black, -4px 4px 0 black, 4px 4px 0 black, -4px 0 0 black, 4px 0 0 black, 0 -4px 0 black, 0 4px 0 black",
+              "-4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000, 0 4px 0 #000, 0 -4px 0 #000, -4px 0 0 #000, 4px 0 0 #000",
             textTransform: "uppercase" as const,
-            letterSpacing: 2,
+            letterSpacing: 3,
             textAlign: "center" as const,
+            lineHeight: 1.2,
           },
         },
         line
@@ -64,11 +112,11 @@ async function makeTextSvg(text: string): Promise<Buffer> {
 
   const svg = await satori(element, {
     width: W,
-    height: H,
-    fonts: [{ name: "Impact", data: fontData, weight: 900, style: "normal" as const }],
+    height: 400,
+    fonts: [{ name: "MemeFont", data: fontData, weight: 400, style: "normal" as const }],
   });
 
-  return Buffer.from(svg);
+  return sharp(Buffer.from(svg)).png().toBuffer();
 }
 
 export async function compositeMeme(
@@ -86,12 +134,10 @@ export async function compositeMeme(
       .jpeg()
       .toBuffer();
   } else {
-    console.warn("[compositor] hotemin.jpg missing");
+    console.warn("[compositor] hotemin.jpg missing — commit it to /public");
     base = await sharp({
-      create: { width: W, height: H, channels: 3, background: { r: 180, g: 30, b: 30 } },
-    })
-      .jpeg()
-      .toBuffer();
+      create: { width: W, height: H, channels: 3, background: { r: 20, g: 10, b: 40 } },
+    }).jpeg().toBuffer();
   }
 
   const steps: sharp.OverlayOptions[] = [];
@@ -117,8 +163,7 @@ export async function compositeMeme(
 
   // Top text
   try {
-    const topSvg = await makeTextSvg(topText);
-    const topPng = await sharp(Buffer.from(topSvg)).png().toBuffer();
+    const topPng = await makeTextPng(topText);
     steps.push({ input: topPng, top: 16, left: 0, blend: "over" });
   } catch (e) {
     console.warn("[compositor] top text failed:", e);
@@ -126,9 +171,8 @@ export async function compositeMeme(
 
   // Bottom text
   try {
-    const botSvg = await makeTextSvg(bottomText);
-    const botPng = await sharp(Buffer.from(botSvg)).png().toBuffer();
-    const bh = (await sharp(botPng).metadata()).height ?? 90;
+    const botPng = await makeTextPng(bottomText);
+    const bh = (await sharp(botPng).metadata()).height ?? 100;
     steps.push({ input: botPng, top: H - bh - 16, left: 0, blend: "over" });
   } catch (e) {
     console.warn("[compositor] bottom text failed:", e);
