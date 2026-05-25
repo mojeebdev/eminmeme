@@ -1,8 +1,7 @@
-import { ImageResponse } from "@vercel/og";
-import { NextRequest } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export async function GET(
   _req: NextRequest,
@@ -10,95 +9,21 @@ export async function GET(
 ) {
   const { slug } = await params;
 
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const { data: meme } = await supabase
     .from("memes")
-    .select("meme_output_url, meme_caption, slug")
+    .select("meme_output_url")
     .eq("slug", slug)
     .single();
 
   if (!meme) {
-    return new ImageResponse(
-      (
-        <div
-          style={{
-            display: "flex",
-            background: "#0D0A1A",
-            width: "1200px",
-            height: "630px",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "white",
-            fontSize: 48,
-            fontFamily: "serif",
-          }}
-        >
-          Emin Meme Generator
-        </div>
-      ),
-      { width: 1200, height: 630 }
-    );
+    return NextResponse.redirect("https://eminmeme.vercel.app/og-default.jpg");
   }
 
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          display: "flex",
-          background: "#0D0A1A",
-          width: "1200px",
-          height: "630px",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        <img
-          src={meme.meme_output_url}
-          style={{ width: "630px", height: "630px", objectFit: "cover" }}
-        />
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            padding: "48px 40px",
-            flex: 1,
-          }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-            <div
-              style={{
-                fontSize: "13px",
-                letterSpacing: "0.2em",
-                color: "#C4A55A",
-                textTransform: "uppercase",
-              }}
-            >
-              Emin Meme Generator
-            </div>
-            <div
-              style={{
-                fontSize: "22px",
-                color: "#F5EDD8",
-                lineHeight: 1.5,
-                fontFamily: "serif",
-                fontStyle: "italic",
-              }}
-            >
-              {meme.meme_caption.slice(0, 120)}
-              {meme.meme_caption.length > 120 ? "…" : ""}
-            </div>
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <div style={{ fontSize: "13px", color: "#6B5E8A" }}>
-              emin is hot bozo · emin is him
-            </div>
-            <div style={{ fontSize: "13px", color: "#C4A55A" }}>
-              eminmeme.vercel.app
-            </div>
-          </div>
-        </div>
-      </div>
-    ),
-    { width: 1200, height: 630 }
-  );
+  // Redirect directly to the meme image — X crawler follows redirects fine
+  return NextResponse.redirect(meme.meme_output_url, { status: 302 });
 }
