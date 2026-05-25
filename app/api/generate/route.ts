@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateMemeCaptions } from "@/lib/gemini";
-import { compositeMeme } from "@/lib/compositor";
+import { compositeMeme } from "@/lib/compositor-satori";
 import { generateSlug } from "@/lib/slug";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
