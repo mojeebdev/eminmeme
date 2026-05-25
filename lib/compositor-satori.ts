@@ -96,7 +96,7 @@ async function makeTextPng(text: string): Promise<Buffer> {
             fontFamily: "MemeFont",
             fontSize: 58,
             fontWeight: 400,
-            color: "white",
+            color: "#FF394A",
             textShadow:
               "-4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000, 4px 4px 0 #000, 0 4px 0 #000, 0 -4px 0 #000, -4px 0 0 #000, 4px 0 0 #000",
             textTransform: "uppercase" as const,
@@ -142,7 +142,7 @@ export async function compositeMeme(
 
   const steps: sharp.OverlayOptions[] = [];
 
-  // User image circular overlay
+  
   if (uploadedImageBase64 && uploadedImageMimeType) {
     try {
       const size = 160;
