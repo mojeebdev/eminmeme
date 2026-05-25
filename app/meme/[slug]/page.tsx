@@ -13,6 +13,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+
   const { data: meme } = await supabase
     .from("memes")
     .select("slug, prompt, meme_caption, meme_output_url")
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!meme) return { title: "Meme Not Found" };
 
   const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://eminmeme.vercel.app";
-  const ogUrl = `${SITE_URL}/api/og/${meme.slug}`;
+  const ogUrl = meme.meme_output_url;
 
   return {
     title: `${meme.prompt.slice(0, 60)} — Emin Meme Generator`,
@@ -46,16 +47,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function MemePage({ params }: Props) {
   const { slug } = await params;
 
-  const { data: meme, error } = await supabase
+  const { data: meme } = await supabase
     .from("memes")
     .select("*")
     .eq("slug", slug)
     .single();
 
-  if (!meme || error) {
-    console.error("[meme page] not found:", slug, error?.message);
-    notFound();
-  }
+  if (!meme) notFound();
 
   const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://eminmeme.vercel.app";
   const memeUrl = `${SITE_URL}/meme/${meme.slug}`;
@@ -75,6 +73,7 @@ export default async function MemePage({ params }: Props) {
   return (
     <main>
       <Header />
+
       <div className="container" style={{ maxWidth: "900px", padding: "64px 24px" }}>
         <Link
           href="/"
@@ -103,11 +102,11 @@ export default async function MemePage({ params }: Props) {
         >
           <div
             style={{
-              borderRadius: "24px",
+              borderRadius: "32px",
               overflow: "hidden",
-              border: "1.5px solid var(--border-hover)",
+              border: "2px solid var(--border-hover)",
               background: "var(--bg-card)",
-              boxShadow: "0 0 40px rgba(196,165,90,0.1)",
+              boxShadow: "0 0 60px rgba(196,165,90,0.12)",
               aspectRatio: "1 / 1",
               display: "flex",
               alignItems: "center",
@@ -119,7 +118,7 @@ export default async function MemePage({ params }: Props) {
               alt={meme.prompt}
               width={800}
               height={800}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
               priority
               unoptimized
             />
@@ -129,6 +128,7 @@ export default async function MemePage({ params }: Props) {
             <span className="tag" style={{ marginBottom: "20px", display: "inline-block" }}>
               emin is him
             </span>
+
             <h1
               style={{
                 fontFamily: "var(--font-playfair)",
@@ -141,6 +141,7 @@ export default async function MemePage({ params }: Props) {
             >
               {meme.top_text}
             </h1>
+
             {meme.bottom_text && (
               <p
                 style={{
@@ -154,6 +155,7 @@ export default async function MemePage({ params }: Props) {
                 {meme.bottom_text}
               </p>
             )}
+
             <p
               style={{
                 fontSize: "14px",
@@ -167,6 +169,7 @@ export default async function MemePage({ params }: Props) {
             >
               {meme.meme_caption}
             </p>
+
             <div style={{ marginBottom: "32px" }}>
               <p style={{ fontSize: "12px", color: "var(--muted)", marginBottom: "6px" }}>
                 {formatDate(meme.created_at)}
@@ -176,17 +179,13 @@ export default async function MemePage({ params }: Props) {
                   href={`https://x.com/${meme.x_handle}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{
-                    fontSize: "13px",
-                    color: "var(--gold-dim)",
-                    textDecoration: "none",
-                    fontWeight: 700,
-                  }}
+                  style={{ fontSize: "13px", color: "var(--gold-dim)", textDecoration: "none", fontWeight: 700 }}
                 >
                   by @{meme.x_handle}
                 </a>
               )}
             </div>
+
             <ShareButtons
               memeUrl={memeUrl}
               shareText={shareText}
@@ -221,6 +220,7 @@ export default async function MemePage({ params }: Props) {
           </Link>
         </div>
       </div>
+
       <Footer />
     </main>
   );
