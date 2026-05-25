@@ -1,5 +1,5 @@
 {
-  "name": "enim-meme-generator",
+  "name": "emin-meme-generator",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
-    "@napi-rs/canvas": "^1.0.0",
     "@supabase/supabase-js": "^2.46.0",
     "@vercel/og": "^0.6.3",
     "next": "16.1.2",
