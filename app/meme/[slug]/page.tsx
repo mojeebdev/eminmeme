@@ -13,7 +13,6 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-
   const { data: meme } = await supabase
     .from("memes")
     .select("slug, prompt, meme_caption, meme_output_url")
@@ -22,22 +21,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!meme) return { title: "Meme Not Found" };
 
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://eminmeme.vercel.app";
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://enimmeme.vercel.app";
   const ogUrl = `${SITE_URL}/api/og/${meme.slug}`;
 
   return {
-    title: `${meme.prompt.slice(0, 60)} — Emin Meme Generator`,
+    title: `${meme.prompt.slice(0, 60)} — Enim Meme Generator`,
     description: meme.meme_caption,
     openGraph: {
-      title: "I just meme'd Emin on Emin Meme Generator 🔥",
-      description: `${meme.meme_caption} #HOTEMIN $HOTEMIN @HotEminSummer`,
+      title: "I just meme'd Enim on Enim Meme Generator 🔥",
+      description: `${meme.meme_caption} #HOTENIM $HOTENIM @HotEminSummer`,
       images: [{ url: ogUrl, width: 1200, height: 630 }],
       url: `${SITE_URL}/meme/${meme.slug}`,
     },
     twitter: {
       card: "summary_large_image",
-      title: "I just meme'd Emin 🔥",
-      description: `${meme.meme_caption} #HOTEMIN $HOTEMIN`,
+      title: "I just meme'd Enim 🔥",
+      description: `${meme.meme_caption} #HOTENIM $HOTENIM`,
       images: [ogUrl],
       site: "@HotEminSummer",
     },
@@ -47,17 +46,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function MemePage({ params }: Props) {
   const { slug } = await params;
 
-  const { data: meme } = await supabase
+  const { data: meme, error } = await supabase
     .from("memes")
     .select("*")
     .eq("slug", slug)
     .single();
 
-  if (!meme) notFound();
+  if (!meme || error) {
+    console.error("[meme page] not found:", slug, error?.message);
+    notFound();
+  }
 
-  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://eminmeme.vercel.app";
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://enimmeme.vercel.app";
   const memeUrl = `${SITE_URL}/meme/${meme.slug}`;
-  const shareText = `I just meme'd Emin on Emin Meme Generator 🔥\n\n${meme.meme_caption}\n\n$HOTEMIN @HotEminSummer`;
+  const shareText = `I just meme'd Enim on Enim Meme Generator 🔥\n\n${meme.meme_caption}\n\n$HOTENIM @HotEminSummer`;
 
   function formatDate(iso: string) {
     return new Date(iso).toLocaleDateString("en-US", {
@@ -73,7 +75,6 @@ export default async function MemePage({ params }: Props) {
   return (
     <main>
       <Header />
-
       <div className="container" style={{ maxWidth: "900px", padding: "64px 24px" }}>
         <Link
           href="/"
@@ -102,11 +103,11 @@ export default async function MemePage({ params }: Props) {
         >
           <div
             style={{
-              borderRadius: "32px",
+              borderRadius: "24px",
               overflow: "hidden",
-              border: "2px solid var(--border-hover)",
+              border: "1.5px solid var(--border-hover)",
               background: "var(--bg-card)",
-              boxShadow: "0 0 60px rgba(196,165,90,0.12)",
+              boxShadow: "0 0 40px rgba(196,165,90,0.1)",
               aspectRatio: "1 / 1",
               display: "flex",
               alignItems: "center",
@@ -118,7 +119,7 @@ export default async function MemePage({ params }: Props) {
               alt={meme.prompt}
               width={800}
               height={800}
-              style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
               priority
               unoptimized
             />
@@ -126,9 +127,8 @@ export default async function MemePage({ params }: Props) {
 
           <div>
             <span className="tag" style={{ marginBottom: "20px", display: "inline-block" }}>
-              emin is him
+              enim is him
             </span>
-
             <h1
               style={{
                 fontFamily: "var(--font-playfair)",
@@ -141,7 +141,6 @@ export default async function MemePage({ params }: Props) {
             >
               {meme.top_text}
             </h1>
-
             {meme.bottom_text && (
               <p
                 style={{
@@ -155,7 +154,6 @@ export default async function MemePage({ params }: Props) {
                 {meme.bottom_text}
               </p>
             )}
-
             <p
               style={{
                 fontSize: "14px",
@@ -169,7 +167,6 @@ export default async function MemePage({ params }: Props) {
             >
               {meme.meme_caption}
             </p>
-
             <div style={{ marginBottom: "32px" }}>
               <p style={{ fontSize: "12px", color: "var(--muted)", marginBottom: "6px" }}>
                 {formatDate(meme.created_at)}
@@ -179,13 +176,17 @@ export default async function MemePage({ params }: Props) {
                   href={`https://x.com/${meme.x_handle}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontSize: "13px", color: "var(--gold-dim)", textDecoration: "none", fontWeight: 700 }}
+                  style={{
+                    fontSize: "13px",
+                    color: "var(--gold-dim)",
+                    textDecoration: "none",
+                    fontWeight: 700,
+                  }}
                 >
                   by @{meme.x_handle}
                 </a>
               )}
             </div>
-
             <ShareButtons
               memeUrl={memeUrl}
               shareText={shareText}
@@ -213,14 +214,13 @@ export default async function MemePage({ params }: Props) {
               marginBottom: "16px",
             }}
           >
-            emin is him. are you?
+            enim is him. are you?
           </p>
           <Link href="/#generate" className="btn-primary">
             Make Your Meme →
           </Link>
         </div>
       </div>
-
       <Footer />
     </main>
   );
