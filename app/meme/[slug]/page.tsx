@@ -57,7 +57,7 @@ export default async function MemePage({ params }: Props) {
 
   const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://eminmeme.vercel.app";
   const memeUrl = `${SITE_URL}/meme/${meme.slug}`;
-  const shareText = `I just meme'd Emin on Emin Meme Generator 🔥\n\n${meme.meme_caption}\n\n$HOTEMIN @HotEminSummer`;
+  const shareText = `${meme.meme_caption}\n\nMeme it: https://eminmeme.vercel.app`;
 
   function formatDate(iso: string) {
     return new Date(iso).toLocaleDateString("en-US", {
@@ -92,38 +92,37 @@ export default async function MemePage({ params }: Props) {
           ← Back to Wall
         </Link>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "48px",
-            alignItems: "start",
-          }}
-        >
+        <div className="meme-page-grid">
+
+          {/* Meme image */}
           <div
             style={{
-              borderRadius: "32px",
+              borderRadius: "24px",
               overflow: "hidden",
-              border: "2px solid var(--border-hover)",
+              border: "1.5px solid var(--border-hover)",
               background: "var(--bg-card)",
-              boxShadow: "0 0 60px rgba(196,165,90,0.12)",
-              aspectRatio: "1 / 1",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              boxShadow: "0 0 40px rgba(196,165,90,0.1)",
+              width: "100%",
+              paddingBottom: "100%",
+              position: "relative",
             }}
           >
             <Image
               src={meme.meme_output_url}
               alt={meme.prompt}
-              width={800}
-              height={800}
-              style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
+              fill
+              style={{
+                objectFit: "cover",
+                position: "absolute",
+                top: 0,
+                left: 0,
+              }}
               priority
               unoptimized
             />
           </div>
 
+          {/* Info + share */}
           <div>
             <span className="tag" style={{ marginBottom: "20px", display: "inline-block" }}>
               emin is him
@@ -179,7 +178,12 @@ export default async function MemePage({ params }: Props) {
                   href={`https://x.com/${meme.x_handle}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontSize: "13px", color: "var(--gold-dim)", textDecoration: "none", fontWeight: 700 }}
+                  style={{
+                    fontSize: "13px",
+                    color: "var(--gold-dim)",
+                    textDecoration: "none",
+                    fontWeight: 700,
+                  }}
                 >
                   by @{meme.x_handle}
                 </a>
@@ -190,6 +194,7 @@ export default async function MemePage({ params }: Props) {
               memeUrl={memeUrl}
               shareText={shareText}
               memeOutputUrl={meme.meme_output_url}
+              memeCaption={meme.meme_caption}
             />
           </div>
         </div>

@@ -6,14 +6,15 @@ interface Props {
   memeUrl: string;
   shareText: string;
   memeOutputUrl: string;
+  memeCaption?: string;
 }
 
-export default function ShareButtons({ memeUrl, shareText, memeOutputUrl }: Props) {
+export default function ShareButtons({ memeUrl, shareText, memeOutputUrl, memeCaption }: Props) {
   const [copied, setCopied] = useState(false);
 
-  const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-    shareText + "\n\n" + memeUrl
-  )}`;
+  const tweetText = `${memeCaption || shareText}\n\nMeme it: https://eminmeme.vercel.app`;
+  const quoteUrl = "https://x.com/mojeebeth/status/2058868165132660840";
+  const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(quoteUrl)}`;
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(memeUrl);

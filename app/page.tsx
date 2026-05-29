@@ -136,14 +136,14 @@ export default function Home() {
                     View & Share
                   </Link>
                   <a
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                      `I just meme'd Emin on Emin Meme Generator 🔥 ${result.meme_caption}\n\neminmeme.vercel.app/meme/${result.slug}`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-ghost"
-                  >
-                    Post to X →
+                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                      `${result.meme_caption}\n\nMeme it: https://eminmeme.vercel.app`
+                     )}&url=${encodeURIComponent("https://x.com/mojeebeth/status/2058868165132660840")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-ghost"
+                    >
+                     Post to X →
                   </a>
                 </div>
               </div>
